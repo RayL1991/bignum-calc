@@ -1,57 +1,98 @@
 // Import stylesheets
 import './style.css';
+import BigNumber from 'bignumber.js';
 
+const evidences = [
+  '1.22',
+  '333333333333333333333333333333333333333333.3333',
+  '444444444444444444444444444444444444444444.44',
+];
 
-const evidences = ["1.22", "333333333333333333333333333333333333333333.3333", "444444444444444444444444444444444444444444.44"]
+let operator = '+';
+const testArray = ['123', '345', '678'];
+const taxRate = 1.5;
+const fxRate = 1.5;
 
-const res = evidences[2].split(".")
+// const isLargeNumber = (val) =>{
+//   return Number(val) > Number.MAX_SAFE_INTEGER
+// }
 
-const sum = evidences.reduce((acc, evid)=> {
-  //console.log(acc)
-  const [accVal, accFloat] = acc.split(".")
+// console.log(evidences.find(isLargeNumber) === undefined, testArray.find((val) => Number(val) > Number.MAX_SAFE_INTEGER) === undefined  )
+// 1. check adn then add tehn together
 
-  //console.log( accVal,accFloat )
+if (evidences.find((val) => Number(val) > Number.MAX_SAFE_INTEGER)) {
+  console.log('sucess');
+}
 
+const sumEvd = evidences.reduce((acc, evid) => {
+  const [accInt, accFloat] = acc.split('.');
 
-  const [val, float] = evid.split(".")
+  const [evdInt, evdFloat] = evid.split('.');
 
-  const sumVal = BigInt(accVal)+BigInt(val)
-  const sumFloat = Number("0."+accFloat) + Number("0."+ float)
+  // 2.check the operator '+' or '-'
+  let sumInt, sumFloat;
+  // opertaor
+  if (operator == '+') {
+    sumInt = BigInt(accInt) + BigInt(evdInt);
 
-  //console.log("0."+accFloat,"0."+ float,sumFloat)
+    if (accInt.includes('-')) {
+      sumFloat = Number('-' + '0.' + accFloat) + Number('0.' + evdFloat);
+    } else {
+      sumFloat = Number('0.' + accFloat) + Number('0.' + evdFloat);
+    }
+    // opertaor '-'
+  } else if (operator == '-') {
+    sumInt = BigInt(accInt) - BigInt(evdInt);
 
-
-  const sumFlo = sumFloat.toString().substring(1,4)
-  let sumSum = sumVal
-  if(sumFloat > 1){
-    sumSum = sumVal + 1n
+    if (accInt.includes('-')) {
+      sumFloat = Number('-' + '0.' + accFloat) - Number('0.' + evdFloat);
+    } else {
+      sumFloat = Number('0.' + accFloat) - Number('0.' + evdFloat);
+    }
+  }
+  let res;
+  if (sumInt.toString().includes('-')) {
+    if (sumFloat < 0) {
+      res = sumInt.toString() + sumFloat.toString().substring(2);
+    } else {
+      res = (sumInt + 1n).toString() + (1 - sumFloat).toString().substring(1);
+    }
+  } else {
+    if (sumFloat > 0) {
+      res = sumInt.toString() + sumFloat.toString().substring(1);
+    } else {
+      res = (sumInt - 1n).toString() + (1 + sumFloat).toString().substring(1);
+    }
   }
 
-  // const sumSum = sumVal + BigInt(SumInt)
-
-  //const 
-
-  //console.log(sumSum.toString(), sumFlo)
-
-  const res = sumSum.toString() + sumFlo.toString()
   //console.log(res)
-  return res
-}, "0.0") 
+  return res;
+}, '0.0');
 
+console.log(sumEvd);
 
-const [sumInt, sumFloat] = sum.split(".")
-const  calc = BigInt(sumInt)*100000000n/BigInt(123)
+const sumBig = new BigNumber(sumEvd);
 
-console.log(sum)
-console.log(sumInt, sumFloat, calc.toString())
+console.log(sumBig.div(1.4).toFixed());
 
-const calc2 = BigInt(sumInt)*BigInt(123)
-console.log(calc2.toString())
+BigNumber.set({ DECIMAL_PLACES: 2 });
 
+let val = new BigNumber(sumEvd).dividedBy(taxRate);
+//val  = val.multipliedBy(fxRate)
+console.log(typeof val, val.toFixed());
 
-const res2 = Math.round(123.37)
+//const [sumInt, sumFloat] = sum.split(".")
+// const  calc = BigInt(sumInt)*100000000n/BigInt(123)
 
-console.log(res2)
+// console.log(sum)
+// console.log(sumInt, sumFloat, calc.toString())
+
+// const calc2 = BigInt(sumInt)*BigInt(123)
+// console.log(calc2.toString())
+
+const res2 = Math.round(123.37);
+
+console.log(typeof res2 === 'number');
 // Write Javascript code!
 const appDiv = document.getElementById('app');
 appDiv.innerHTML = `<h1>JS Starter</h1>`;

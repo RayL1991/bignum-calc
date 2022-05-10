@@ -1,6 +1,6 @@
 // Import stylesheets
 import './style.css';
-import BigNumber from 'bignumber.js';
+import Big from 'big.js';
 
 const evidences = [
   '1.22',
@@ -10,7 +10,7 @@ const evidences = [
 
 let operator = '+';
 const testArray = ['123', '345', '678'];
-const taxRate = 1.5;
+const taxRate = 0.5;
 const fxRate = 1.5;
 
 // const isLargeNumber = (val) =>{
@@ -19,67 +19,33 @@ const fxRate = 1.5;
 
 // console.log(evidences.find(isLargeNumber) === undefined, testArray.find((val) => Number(val) > Number.MAX_SAFE_INTEGER) === undefined  )
 // 1. check adn then add tehn together
+// console.log(Big('1232322.45567767676').toFixed(4))
+// if (evidences.find((val) => Number(val) >= Number.MAX_SAFE_INTEGER)) {
+//   console.log('sucess');
+// }
 
-if (evidences.find((val) => Number(val) > Number.MAX_SAFE_INTEGER)) {
-  console.log('sucess');
-}
+// const totalEvidenceAmount = evidences.reduce((acc, evid) => {
+  
+//   return Big(acc).plus(Big(evid));
+// }, '0.0');
 
-const sumEvd = evidences.reduce((acc, evid) => {
-  const [accInt, accFloat] = acc.split('.');
+//console.log(totalEvidenceAmount.toFixed());
+//const res = totalEvidenceAmount.minus(totalEvidenceAmount.div(1 + Math.abs(taxRate))).toFixed(3)
 
-  const [evdInt, evdFloat] = evid.split('.');
+//console.log('-'+res)
 
-  // 2.check the operator '+' or '-'
-  let sumInt, sumFloat;
-  // opertaor
-  if (operator == '+') {
-    sumInt = BigInt(accInt) + BigInt(evdInt);
+//console.log(sumEvd.times(1.5).toFixed())
+//console.log(typeof sumEvd.times(1.5))
 
-    if (accInt.includes('-')) {
-      sumFloat = Number('-' + '0.' + accFloat) + Number('0.' + evdFloat);
-    } else {
-      sumFloat = Number('0.' + accFloat) + Number('0.' + evdFloat);
-    }
-    // opertaor '-'
-  } else if (operator == '-') {
-    sumInt = BigInt(accInt) - BigInt(evdInt);
+// const sumBig = new Big(sumEvd);
 
-    if (accInt.includes('-')) {
-      sumFloat = Number('-' + '0.' + accFloat) - Number('0.' + evdFloat);
-    } else {
-      sumFloat = Number('0.' + accFloat) - Number('0.' + evdFloat);
-    }
-  }
-  let res;
-  if (sumInt.toString().includes('-')) {
-    if (sumFloat < 0) {
-      res = sumInt.toString() + sumFloat.toString().substring(2);
-    } else {
-      res = (sumInt + 1n).toString() + (1 - sumFloat).toString().substring(1);
-    }
-  } else {
-    if (sumFloat > 0) {
-      res = sumInt.toString() + sumFloat.toString().substring(1);
-    } else {
-      res = (sumInt - 1n).toString() + (1 + sumFloat).toString().substring(1);
-    }
-  }
+// console.log(sumBig.div(1.4).toFixed());
 
-  //console.log(res)
-  return res;
-}, '0.0');
+// BigNumber.set({ DECIMAL_PLACES: 2 });
 
-console.log(sumEvd);
-
-const sumBig = new BigNumber(sumEvd);
-
-console.log(sumBig.div(1.4).toFixed());
-
-BigNumber.set({ DECIMAL_PLACES: 2 });
-
-let val = new BigNumber(sumEvd).dividedBy(taxRate);
-//val  = val.multipliedBy(fxRate)
-console.log(typeof val, val.toFixed());
+// let val = new BigNumber(sumEvd).dividedBy(taxRate);
+// //val  = val.multipliedBy(fxRate)
+// console.log(typeof val, val.toFixed());
 
 //const [sumInt, sumFloat] = sum.split(".")
 // const  calc = BigInt(sumInt)*100000000n/BigInt(123)
@@ -90,9 +56,41 @@ console.log(typeof val, val.toFixed());
 // const calc2 = BigInt(sumInt)*BigInt(123)
 // console.log(calc2.toString())
 
-const res2 = Math.round(123.37);
+// const res2 = Math.round(123.37);
 
-console.log(typeof res2 === 'number');
+// console.log(typeof res2 === 'number');
+
+
+function getLargeNumberAccuracyTest (taxRate, fxRate, evidences, sampleAmount){
+
+  const totalEvidenceAmount = evidences.reduce((acc, evid) => {
+  
+    return Big(acc).plus(Big(evid));
+  }, '0.0');
+
+  const recordedAmount = sampleAmount ? Big(sampleAmount) : Big(0)
+
+  let taxAmount = totalEvidenceAmount.minus(totalEvidenceAmount.div(1 + Math.abs(taxRate))).toFixed(2)
+  if (taxRate < 0) {
+    taxAmount = '-' + taxAmount
+  }
+  const amountAfterTaxAdjustment = totalEvidenceAmount.plus(Big(taxAmount)).toFixed(2)
+  const evidenceAmount = Big(amountAfterTaxAdjustment).times(fxRate).toFixed(2)
+  const variance = recordedAmount.minus(Big(evidenceAmount)).toFixed(2)
+  const isIncorrect = Math.abs(Number(variance)) >= 1
+
+  return {
+    evidenceAmount, taxRate, fxRate, taxAmount, recordedAmount: recordedAmount.toFixed(2), amountAfterTaxAdjustment, totalEvidenceAmount: totalEvidenceAmount.toFixed(2), variance, isIncorrect,
+  }
+}
+
+const sample = '333333333333333333333333333333333333333333.33'
+const res = getLargeNumberAccuracyTest(taxRate,fxRate,evidences,sample )
+console.log(res)
+
+console.log(typeof res.totalEvidenceAmount)
+console.log(Number(''|| 3))
+//
 // Write Javascript code!
 const appDiv = document.getElementById('app');
 appDiv.innerHTML = `<h1>JS Starter</h1>`;
